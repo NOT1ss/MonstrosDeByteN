@@ -4,7 +4,7 @@ import robocode.*;
 import java.awt.Color;
 import java.util.Random;
 
-public class Trystan extends AdvancedRobot {
+public class TrystanBot extends AdvancedRobot {
 
     //Envio no grupo do telegram
     
