@@ -1,41 +1,82 @@
-name: Qualidade e Segurança
+name: CI - Robocode, Checkstyle e SpotBugs com relatório
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
+
+env:
+  # Ajuste este caminho para onde seus arquivos .java estão
+  ROBOTS_JAVA_DIR: src
 
 jobs:
-  qualidade-seguranca:
+  qualidade_e_seguranca:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout do código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar Java 11
+      - name: Setup Java 11
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 11
+          distribution: 'temurin'
+          java-version: '11'
+          
+      # CHECKSTYLE
+      - name: Baixar Checkstyle
+        run: wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.4/checkstyle-10.12.4-all.jar -O checkstyle.jar
 
-      - name: Compilar o Robô
+      - name: Rodar Checkstyle e salvar status
         run: |
-          mkdir -p build
-          javac -cp "libs/robocode.jar" -d build src/*.java
+          mkdir -p battle_logs
+          # 'set +e' permite que o workflow continue mesmo se o checkstyle falhar
+          set +e 
+          java -jar checkstyle.jar -c libs/google_checks.xml $ROBOTS_JAVA_DIR/*.java
+          # Salva o código de saída (0 para sucesso) no arquivo
+          echo $? > battle_logs/checkstyle_status.txt
+          set -e
 
-      - name: Rodar Checkstyle
+      # SPOTBUGS
+      - name: Baixar e extrair SpotBugs
         run: |
-          wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.4/checkstyle-10.12.4-all.jar -O checkstyle.jar
-          java -jar checkstyle.jar -c libs/google_checks.xml src/*.java
-
-      - name: Rodar SpotBugs
-        run: |
-          wget https://github.com/spotbugs/spotbugs/releases/download/4.8.3/spotbugs-4.8.3.tgz -O spotbugs.tgz
-          tar -xvzf spotbugs.tgz
+          wget https://repo1.maven.org/maven2/com/github/spotbugs/spotbugs/4.8.3/spotbugs-4.8.3.tgz -O spotbugs.tgz
+          tar -xzf spotbugs.tgz
           chmod +x spotbugs-4.8.3/bin/spotbugs
-          ./spotbugs-4.8.3/bin/spotbugs -textui -effort:max -high -auxclasspath libs/robocode.jar build
 
-      - name: Mensagem final
-        run: echo "Pipeline finalizado com sucesso! Código analisado e aprovado."
+      - name: Compilar robôs para SpotBugs
+        run: |
+          mkdir -p classes
+          javac -cp libs/robocode.jar $ROBOTS_JAVA_DIR/*.java -d classes
+
+      - name: Rodar SpotBugs e salvar status
+        run: |
+          set +e
+          spotbugs-4.8.3/bin/spotbugs -textui -effort:min -output battle_logs/spotbugs.txt classes
+          echo $? > battle_logs/spotbugs_status.txt
+          set -e
+
+      # ROBOCODE
+      - name: Compilar robôs para a batalha e salvar status
+        run: |
+          # A pasta de destino deve ser 'robocode/robots/' para o robocode encontrar
+          mkdir -p robocode/robots/
+          javac -cp libs/robocode.jar $ROBOTS_JAVA_DIR/*.java -d robocode/robots/
+          echo $? > battle_logs/robocode_build_status.txt
+
+      # GERAR RELATÓRIO
+      - name: Gerar Relatório da Batalha
+        run: |
+          # Dá permissão de execução ao script
+          chmod +x scripts/testar_batalha.sh
+          bash scripts/testar_batalha.sh
+
+      # UPLOAD DO ARTEFATO
+      - name: Upload battle logs (com relatório)
+        # 'if: always()' garante que o upload aconteça mesmo se uma etapa anterior falhar
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-batalha
+          # Faz upload de tudo que está na pasta battle_logs
+          path: battle_logs/
