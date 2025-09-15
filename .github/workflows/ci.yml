@@ -59,6 +59,13 @@ jobs:
           mkdir -p robocode/robots/
           javac -cp libs/robocode.jar $ROBOTS_JAVA_DIR/*.java -d robocode/robots/
           echo $? > battle_logs/robocode_build_status.txt
+      
+      - name: DEBUG - Listar arquivos compilados
+        run: |
+          echo "================================================="
+          echo "Conteúdo da pasta robocode/robots:"
+          ls -R robocode/robots
+          echo "================================================="
 
       # GERAR RELATÓRIO
       - name: Gerar Relatório da Batalha
