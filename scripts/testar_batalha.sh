@@ -7,15 +7,15 @@ mkdir -p battle_logs
 cat > battle_logs/my_battle.battle <<EOF
 robocode.battleField.width=800
 robocode.battleField.height=600
-robocode.battle.numRounds=3
+# --- NÚMERO DE ROUNDS AUMENTADO ---
+robocode.battle.numRounds=10
 robocode.battle.gunCoolingRate=0.1
 robocode.battle.rules.inactivityTime=450
 robocode.battle.hideEnemyNames=false
-# --- LISTA DE ROBÔS CORRIGIDA COM OS PACOTES CERTOS ---
 robocode.battle.robots=FM.TrystanBot,github.Corners
 EOF
 
-echo "Rodando batalhazona foda..."
+echo "Rodando batalha..."
 java -Xmx512M -cp "libs/*" -Drobocode.robot.path=$PWD/robocode/robots robocode.Robocode -battle battle_logs/my_battle.battle -nodisplay > battle_logs/battle_result.txt 2>&1 || true
 
 STATUS_CHECKSTYLE=$(cat battle_logs/checkstyle_status.txt 2>/dev/null || echo "N/A")
