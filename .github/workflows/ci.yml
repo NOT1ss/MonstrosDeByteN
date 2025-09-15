@@ -7,7 +7,6 @@ on:
     branches: [ main ]
 
 env:
-  # Ajuste este caminho para onde seus arquivos .java estão
   ROBOTS_JAVA_DIR: src
 
 jobs:
@@ -30,10 +29,8 @@ jobs:
       - name: Rodar Checkstyle e salvar status
         run: |
           mkdir -p battle_logs
-          # 'set +e' permite que o workflow continue mesmo se o checkstyle falhar
           set +e 
           java -jar checkstyle.jar -c libs/google_checks.xml $ROBOTS_JAVA_DIR/*.java
-          # Salva o código de saída (0 para sucesso) no arquivo
           echo $? > battle_logs/checkstyle_status.txt
           set -e
 
@@ -59,7 +56,6 @@ jobs:
       # ROBOCODE
       - name: Compilar robôs para a batalha e salvar status
         run: |
-          # A pasta de destino deve ser 'robocode/robots/' para o robocode encontrar
           mkdir -p robocode/robots/
           javac -cp libs/robocode.jar $ROBOTS_JAVA_DIR/*.java -d robocode/robots/
           echo $? > battle_logs/robocode_build_status.txt
@@ -67,16 +63,13 @@ jobs:
       # GERAR RELATÓRIO
       - name: Gerar Relatório da Batalha
         run: |
-          # Dá permissão de execução ao script
           chmod +x scripts/testar_batalha.sh
           bash scripts/testar_batalha.sh
 
       # UPLOAD DO ARTEFATO
       - name: Upload battle logs (com relatório)
-        # 'if: always()' garante que o upload aconteça mesmo se uma etapa anterior falhar
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: relatorio-batalha
-          # Faz upload de tudo que está na pasta battle_logs
           path: battle_logs/
