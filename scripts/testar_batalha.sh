@@ -11,13 +11,14 @@ robocode.battle.numRounds=10
 robocode.battle.gunCoolingRate=0.1
 robocode.battle.rules.inactivityTime=450
 robocode.battle.hideEnemyNames=false
-# --- LISTA DE ROBÔS ALTERADA PARA UM OPONENTE PADRÃO ---
 robocode.battle.robots=FM.TrystanBot,sample.Crazy
 EOF
 
-echo "Rodando batalha..."
-java -Xmx512M -cp "libs/*" -Drobocode.robot.path=$PWD/robocode/robots robocode.Robocode -battle battle_logs/my_battle.battle -nodisplay > battle_logs/battle_result.txt 2>&1 || true
+echo "Rodando batalha em modo verbose..."
+# --- ALTERAÇÃO FINAL: Adicionada a flag -verbose ---
+java -Xmx512M -cp "libs/*" -Drobocode.robot.path=$PWD/robocode/robots robocode.Robocode -battle battle_logs/my_battle.battle -nodisplay -verbose > battle_logs/battle_result.txt 2>&1 || true
 
+# (O resto do arquivo continua o mesmo)
 STATUS_CHECKSTYLE=$(cat battle_logs/checkstyle_status.txt 2>/dev/null || echo "N/A")
 STATUS_SPOTBUGS=$(cat battle_logs/spotbugs_status.txt 2>/dev/null || echo "N/A")
 STATUS_COMPILE=$(cat battle_logs/robocode_build_status.txt 2>/dev/null || echo "N/A")
@@ -72,5 +73,5 @@ cat >> "$REPORT_HTML" <<EOF
 </body>
 </html>
 EOF
-echo "Relatório HTML gerado em $REPORT_HTML"
+echo "Relatório HTML gerado em $HTML_REPORT"
 exit 0
