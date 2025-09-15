@@ -22,10 +22,9 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
           
-      # CHECKSTYLE
+      # CHECKSTYLE E SPOTBUGS
       - name: Baixar Checkstyle
         run: wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.4/checkstyle-10.12.4-all.jar -O checkstyle.jar
-
       - name: Rodar Checkstyle e salvar status
         run: |
           mkdir -p battle_logs
@@ -33,19 +32,15 @@ jobs:
           java -jar checkstyle.jar -c libs/google_checks.xml $ROBOTS_JAVA_DIR/*.java
           echo $? > battle_logs/checkstyle_status.txt
           set -e
-
-      # SPOTBUGS
       - name: Baixar e extrair SpotBugs
         run: |
           wget https://repo1.maven.org/maven2/com/github/spotbugs/spotbugs/4.8.3/spotbugs-4.8.3.tgz -O spotbugs.tgz
           tar -xzf spotbugs.tgz
           chmod +x spotbugs-4.8.3/bin/spotbugs
-
       - name: Compilar robôs para SpotBugs
         run: |
           mkdir -p classes
-          javac -cp libs/robocode.jar $ROBOTS_JAVA_DIR/*.java -d classes
-
+          javac -cp libs/robocode.jar -d classes -sourcepath $ROBOTS_JAVA_DIR $ROBOTS_JAVA_DIR/*.java
       - name: Rodar SpotBugs e salvar status
         run: |
           set +e
@@ -53,11 +48,11 @@ jobs:
           echo $? > battle_logs/spotbugs_status.txt
           set -e
 
-      # ROBOCODE
       - name: Compilar robôs para a batalha e salvar status
         run: |
           mkdir -p robocode/robots/
-          javac -cp libs/robocode.jar $ROBOTS_JAVA_DIR/*.java -d robocode/robots/
+          # Compila a partir da pasta src para preservar a estrutura de pacotes
+          javac -cp "libs/*" -d robocode/robots/ -sourcepath $ROBOTS_JAVA_DIR $ROBOTS_JAVA_DIR/*.java
           echo $? > battle_logs/robocode_build_status.txt
       
       - name: DEBUG - Listar arquivos compilados

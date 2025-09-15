@@ -11,18 +11,17 @@ robocode.battle.numRounds=3
 robocode.battle.gunCoolingRate=0.1
 robocode.battle.rules.inactivityTime=450
 robocode.battle.hideEnemyNames=false
-robocode.battle.robots=FM.TrystanBot,sample.Corners
+# --- LISTA DE ROBÔS CORRIGIDA COM OS PACOTES CERTOS ---
+robocode.battle.robots=FM.TrystanBot,github.Corners
 EOF
 
-echo "Rodando batalha..."
+echo "Rodando batalhazona foda..."
 java -Xmx512M -cp "libs/*" -Drobocode.robot.path=$PWD/robocode/robots robocode.Robocode -battle battle_logs/my_battle.battle -nodisplay > battle_logs/battle_result.txt 2>&1 || true
 
-# Lê os status que o ci.yml salvou
 STATUS_CHECKSTYLE=$(cat battle_logs/checkstyle_status.txt 2>/dev/null || echo "N/A")
 STATUS_SPOTBUGS=$(cat battle_logs/spotbugs_status.txt 2>/dev/null || echo "N/A")
 STATUS_COMPILE=$(cat battle_logs/robocode_build_status.txt 2>/dev/null || echo "N/A")
 
-# Função para converter o status em um texto HTML formatado
 html_interpreta() {
   if [[ "$1" == "0" ]]; then
     echo "<span style='color:green;font-weight:bold'>✅ Sucesso</span> <span style='color:gray'>(0)</span>"
@@ -35,7 +34,6 @@ html_interpreta() {
   fi
 }
 
-# Monta o relatório HTML
 REPORT_HTML="battle_logs/report.html"
 cat > "$REPORT_HTML" <<EOF
 <!DOCTYPE html>
@@ -66,10 +64,7 @@ cat > "$REPORT_HTML" <<EOF
   <h2 class="emoji">⚔️ Log da Batalha</h2>
   <pre>
 EOF
-
-# Adiciona o log da batalha ao relatório
 cat battle_logs/battle_result.txt >> "$REPORT_HTML"
-
 cat >> "$REPORT_HTML" <<EOF
   </pre>
   <hr>
@@ -77,6 +72,5 @@ cat >> "$REPORT_HTML" <<EOF
 </body>
 </html>
 EOF
-
 echo "Relatório HTML gerado em $REPORT_HTML"
 exit 0
