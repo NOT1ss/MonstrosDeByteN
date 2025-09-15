@@ -40,7 +40,7 @@ jobs:
       - name: Compilar robôs para SpotBugs
         run: |
           mkdir -p classes
-          javac -cp libs/robocode.jar -d classes -sourcepath $ROBOTS_JAVA_DIR $ROBOTS_JAVA_DIR/*.java
+          javac -cp "libs/*" -d classes $ROBOTS_JAVA_DIR/*.java
       - name: Rodar SpotBugs e salvar status
         run: |
           set +e
@@ -51,8 +51,9 @@ jobs:
       - name: Compilar robôs para a batalha e salvar status
         run: |
           mkdir -p robocode/robots/
-          # Compila a partir da pasta src para preservar a estrutura de pacotes
-          javac -cp "libs/*" -d robocode/robots/ -sourcepath $ROBOTS_JAVA_DIR $ROBOTS_JAVA_DIR/*.java
+          # Compila cada arquivo a partir do seu diretório raiz (src)
+          # para forçar a criação da estrutura de pacotes no destino.
+          javac -cp "libs/*" -d robocode/robots/ src/TrystanBot.java src/Corners.java
           echo $? > battle_logs/robocode_build_status.txt
       
       - name: DEBUG - Listar arquivos compilados
