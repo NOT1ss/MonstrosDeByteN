@@ -3,6 +3,7 @@ set +e
 
 mkdir -p battle_logs
 
+# Monta a configuração da batalha
 cat > battle_logs/my_battle.battle <<EOF
 robocode.battleField.width=800
 robocode.battleField.height=600
@@ -13,8 +14,8 @@ robocode.battle.hideEnemyNames=false
 robocode.battle.robots=FM.TrystanBot,sample.Corners
 EOF
 
-echo "Rodando batalha..."
-java -Xmx512M -cp "libs/*" robocode.Robocode -battle battle_logs/my_battle.battle -nodisplay > battle_logs/battle_result.txt 2>&1 || true
+echo "Rodando batalhazona foda..."
+java -Xmx512M -cp "libs/*:robocode/robots/" robocode.Robocode -battle battle_logs/my_battle.battle -nodisplay > battle_logs/battle_result.txt 2>&1 || true
 
 # Lê os status que o ci.yml salvou
 STATUS_CHECKSTYLE=$(cat battle_logs/checkstyle_status.txt 2>/dev/null || echo "N/A")
