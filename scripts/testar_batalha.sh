@@ -15,7 +15,7 @@ robocode.battle.robots=FM.TrystanBot,sample.Corners
 EOF
 
 echo "Rodando batalhazona foda..."
-java -Xmx512M -cp "libs/*:robocode/robots/" robocode.Robocode -battle battle_logs/my_battle.battle -nodisplay > battle_logs/battle_result.txt 2>&1 || true
+java -Xmx512M -cp "libs/*" -Drobocode.robot.path=robocode/robots robocode.Robocode -battle battle_logs/my_battle.battle -nodisplay > battle_logs/battle_result.txt 2>&1 || true
 
 # Lê os status que o ci.yml salvou
 STATUS_CHECKSTYLE=$(cat battle_logs/checkstyle_status.txt 2>/dev/null || echo "N/A")
