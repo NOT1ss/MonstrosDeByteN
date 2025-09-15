@@ -7,12 +7,12 @@ mkdir -p battle_logs
 cat > battle_logs/my_battle.battle <<EOF
 robocode.battleField.width=800
 robocode.battleField.height=600
-# --- NÚMERO DE ROUNDS AUMENTADO ---
 robocode.battle.numRounds=10
 robocode.battle.gunCoolingRate=0.1
 robocode.battle.rules.inactivityTime=450
 robocode.battle.hideEnemyNames=false
-robocode.battle.robots=FM.TrystanBot,github.Corners
+# --- LISTA DE ROBÔS ALTERADA PARA UM OPONENTE PADRÃO ---
+robocode.battle.robots=FM.TrystanBot,sample.Crazy
 EOF
 
 echo "Rodando batalha..."
