@@ -14,9 +14,9 @@ robocode.battle.hideEnemyNames=false
 robocode.battle.robots=FM.TrystanBot,sample.Crazy
 EOF
 
-echo "Rodando batalha em modo verbose..."
-# --- ALTERAÇÃO FINAL: Adicionada a flag -verbose ---
-java -Xmx512M -cp "libs/*" -Drobocode.robot.path=$PWD/robocode/robots robocode.Robocode -battle battle_logs/my_battle.battle -nodisplay -verbose > battle_logs/battle_result.txt 2>&1 || true
+echo "Rodando batalha em modo de depuração..."
+# --- CORREÇÃO FINAL: Usando a flag de debug correta ---
+java -Xmx512M -Ddebug=true -cp "libs/*" -Drobocode.robot.path=$PWD/robocode/robots robocode.Robocode -battle battle_logs/my_battle.battle -nodisplay > battle_logs/battle_result.txt 2>&1 || true
 
 # (O resto do arquivo continua o mesmo)
 STATUS_CHECKSTYLE=$(cat battle_logs/checkstyle_status.txt 2>/dev/null || echo "N/A")
@@ -73,5 +73,5 @@ cat >> "$REPORT_HTML" <<EOF
 </body>
 </html>
 EOF
-echo "Relatório HTML gerado em $HTML_REPORT"
+echo "Relatório HTML gerado em $REPORT_HTML"
 exit 0
