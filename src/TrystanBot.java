@@ -6,7 +6,6 @@ import java.util.Random;
 
 public class TrystanBot extends AdvancedRobot {
 
-    private Random aleatorio = new Random();
     private byte direcaoMovimento = 1; // Usado para alternar a direção
 
     public void run() {
@@ -17,23 +16,26 @@ public class TrystanBot extends AdvancedRobot {
         setAdjustRadarForRobotTurn(true);
         setAdjustGunForRobotTurn(true);
 
-        // Loop principal: A única responsabilidade é procurar inimigos sem parar.
-        // As chamadas set... são não-bloqueantes. O execute() no final aplica todas elas.
+        // Loop principal definitivo: Apenas gira o radar. O motor do jogo chama execute() automaticamente.
+        // Isso garante que o robô está sempre receptivo a eventos como onScannedRobot.
         while (true) {
-            setTurnRadarRight(360); // Gira o radar para escanear
-            execute(); // Executa todas as ações pendentes (neste caso, o giro do radar)
+            turnRadarRight(360);
         }
     }
 
     @Override
     public void onScannedRobot(ScannedRobotEvent evento) {
+        // --- DIAGNÓSTICO: Imprime no log da batalha para confirmar que o evento foi acionado ---
+        out.println("TrystanBot VIU O INIMIGO: " + evento.getName() + " no turno " + getTime());
+
         // --- LÓGICA DE MIRA E TIRO ---
         double distancia = evento.getDistance();
         double potenciaDeTiro = Math.min(3, Math.max(1, 400 / distancia));
 
-        // Mira preditiva simples
         double bearingAbsoluto = getHeadingRadians() + evento.getBearingRadians();
         double giroDoCanhao = robocode.util.Utils.normalRelativeAngle(bearingAbsoluto - getGunHeadingRadians());
+        
+        // Usamos setTurnGunRightRadians para ser não-bloqueante
         setTurnGunRightRadians(giroDoCanhao);
 
         // Atira se a arma não estiver quente
@@ -42,21 +44,15 @@ public class TrystanBot extends AdvancedRobot {
         }
         
         // --- LÓGICA DE MOVIMENTO EVASIVO ---
-        // Vira 90 graus em relação ao inimigo e se move
         setTurnRight(evento.getBearing() + 90);
         
-        // Lógica para alternar entre ir para frente e para trás para ser imprevisível
         if (getTime() % 20 == 0) {
             direcaoMovimento *= -1;
             setAhead(150 * direcaoMovimento);
         }
         
-        // --- LÓGICA DO RADAR ---
-        // Mantém o radar travado no inimigo que acabamos de ver
-        setTurnRadarRight(getHeading() - getRadarHeading() + evento.getBearing());
-
-        // Executa todas as ações planejadas (virar, mover, atirar, etc.)
-        execute();
+        // Não precisamos mais girar o radar aqui, o loop run() já faz isso.
+        // Isso evita que o radar fique "preso" em um inimigo e perca outros.
     }
 
     @Override
@@ -64,14 +60,12 @@ public class TrystanBot extends AdvancedRobot {
         // Ao ser atingido, tenta sair da linha de tiro
         setTurnRight(evento.getBearing() + 90);
         setAhead(150);
-        execute();
     }
 
     @Override
     public void onHitWall(HitWallEvent evento) {
         // Se bater na parede, recua e vira
-        direcaoMovimento *= -1; // Inverte a direção de movimento
+        direcaoMovimento *= -1;
         setAhead(100 * direcaoMovimento);
-        execute();
     }
 }
